@@ -21,12 +21,39 @@ function plugin (Vue) {
         const _this = this
         return (permissions) => {
           const [permission, action] = permissions.split('.')
-          const permissionList = _this.$store.getters.roles.permissions
-          return permissionList.find((val) => {
-            return val.permissionId === permission
-          }).actionList.findIndex((val) => {
-            return val === action
-          }) > -1
+          // TODO - Fixed
+          const roles = _this.$store.getters.roles
+          let permissionList = []
+          if (roles && Object.prototype.toString.call(roles) === '[object Array]') {
+            roles.map(role => {
+              permissionList = permissionList.concat(role.permissions)
+            })
+          } else {
+            permissionList = roles.permissions
+          }
+
+          // const permissionList = _this.$store.getters.roles.permissions
+          // 用户有多个角色时有 BUG
+          // return permissionList.find((val) => {
+          //   return val.permissionId === permission
+          // }).actionList.findIndex((val) => {
+          //   return val === action
+          // }) > -1
+
+          // Fixed
+          let hasActionPermission = false
+          permissionList.map(per => {
+            if (hasActionPermission || per.permissionId !== permission) {
+              return
+            }
+
+            if (per.actionList.findIndex((val) => {
+              return val === action
+            }) > -1) {
+              hasActionPermission = true
+            }
+          })
+          return hasActionPermission
         }
       }
     }

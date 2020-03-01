@@ -101,7 +101,7 @@
             <a-menu-item>
               <a href="javascript:;">详情</a>
             </a-menu-item>
-            <a-menu-item v-if="$auth('table.disable')">
+            <a-menu-item v-if="$auth('table.update')">
               <a href="javascript:;">禁用</a>
             </a-menu-item>
             <a-menu-item v-if="$auth('table.delete')">

@@ -52,23 +52,40 @@ const user = {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
           const result = response.result
-
-          if (result.role && result.role.permissions.length > 0) {
-            const role = result.role
-            role.permissions = result.role.permissions
-            role.permissions.map(per => {
-              if (per.actionEntitySet != null && per.actionEntitySet.length > 0) {
-                const action = per.actionEntitySet.map(action => { return action.action })
-                per.actionList = action
-              }
+          // TODO  - Fixed
+          // 设计上的问题， 一个 User 只属于一个 Role, 这个 Role 可授予多个 Permission
+          // 后台的实现： 当一个 User 授予多个 Role, 需要把多个 Role 的 Permission 合并同时去重
+          // --
+          // 返回的 role 不是数据组时
+          let roles = []
+          if (result.roles && Object.prototype.toString.call(result.roles) === '[object Array]') {
+            result.roles.map(role => {
+              roles = roles.concat(role)
             })
-            role.permissionList = role.permissions.map(permission => { return permission.permissionId })
-            commit('SET_ROLES', result.role)
-            commit('SET_INFO', result)
+          } else if (result.roles && result.roles.permissions.length > 0) {
+            roles = roles.concat(result.roles)
           } else {
             reject(new Error('getInfo: roles must be a non-null array !'))
           }
 
+          roles.map(role => {
+            if (role.permissions.length > 0) {
+              role.permissions.map(per => {
+                if (per.actionEntitySet != null && per.actionEntitySet.length > 0) {
+                  const action = per.actionEntitySet.map(action => {
+                    return action.action
+                  })
+                  per.actionList = action
+                }
+              })
+              role.permissionList = role.permissions.map(permission => {
+                return permission.permissionId
+              })
+            }
+          })
+
+          commit('SET_ROLES', result.roles)
+          commit('SET_INFO', result)
           commit('SET_NAME', { name: result.name, welcome: welcome() })
           commit('SET_AVATAR', result.avatar)
 

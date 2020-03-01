@@ -5,6 +5,7 @@ import app from './modules/app'
 import user from './modules/user'
 
 // default router permission control
+// TODO - Comments the following import if use DB Setting
 import permission from './modules/permission'
 
 // dynamic router permission control (Experimental)

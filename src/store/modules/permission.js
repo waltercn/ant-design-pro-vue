@@ -30,6 +30,7 @@ function hasPermission (permission, route) {
  */
 // eslint-disable-next-line
 function hasRole(roles, route) {
+  // TODO - TBD: Double Check
   if (route.meta && route.meta.roles) {
     return route.meta.roles.includes(roles.id)
   } else {
@@ -39,7 +40,18 @@ function hasRole(roles, route) {
 
 function filterAsyncRouter (routerMap, roles) {
   const accessedRouters = routerMap.filter(route => {
-    if (hasPermission(roles.permissionList, route)) {
+    // TODO - Fixed
+    let permissionList = []
+    if (roles && Object.prototype.toString.call(roles) === '[object Array]') {
+      roles.map(role => {
+        permissionList = permissionList.concat(role.permissionList)
+      })
+    } else {
+      // permissionList = permissionList.concat(roles.permissionList)
+      permissionList = roles.permissionList
+    }
+
+    if (hasPermission(permissionList, route)) {
       if (route.children && route.children.length) {
         route.children = filterAsyncRouter(route.children, roles)
       }

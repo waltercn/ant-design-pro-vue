@@ -86,7 +86,7 @@ export const asyncRouterMap = [
             path: '/list/table-list/:pageNo([1-9]\\d*)?',
             name: 'TableListWrapper',
             hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-            component: () => import('@/views/list/TableList'),
+            component: () => import('@/views/list/QueryList'),
             meta: { title: '查询表格', keepAlive: true, permission: [ 'table' ] }
           },
           {

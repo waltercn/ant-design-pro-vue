@@ -20,14 +20,37 @@ const action = Vue.directive('action', {
     const roles = store.getters.roles
     const elVal = vnode.context.$route.meta.permission
     const permissionId = elVal instanceof String && [elVal] || elVal
-    roles.permissions.forEach(p => {
-      if (!permissionId.includes(p.permissionId)) {
+
+    // TODO - Roles is Array: Fixed
+    let permissions = []
+    if (roles && Object.prototype.toString.call(roles) === '[object Array]') {
+      roles.map(role => {
+        permissions = permissions.concat(role.permissions)
+      })
+    } else if (roles.permissions && roles.permissions.length > 0) {
+      // permissions = permissions.concat(roles.permissions)
+      permissions = roles.permissions
+    }
+
+    // TODO - Fixed : 当多个  Role 具有相同的 PermissionId, 但 该PermissionId 中的 actionList 不同， 则会有 BUG 出现
+    // 另一个方法: 相同的 permissionId 的 actionList 需要合并
+    let hasActionPermission = false
+    permissions.forEach(p => {
+      if (hasActionPermission || !permissionId.includes(p.permissionId)) {
         return
       }
-      if (p.actionList && !p.actionList.includes(actionName)) {
-        el.parentNode && el.parentNode.removeChild(el) || (el.style.display = 'none')
+      // if (p.actionList && !p.actionList.includes(actionName)) {
+      //   el.parentNode && el.parentNode.removeChild(el) || (el.style.display = 'none')
+      // }
+
+      if (permissionId.includes(p.permissionId) && p.actionList && p.actionList.includes(actionName)) {
+        hasActionPermission = true
       }
     })
+
+    if (!hasActionPermission) {
+      el.parentNode && el.parentNode.removeChild(el) || (el.style.display = 'none')
+    }
   }
 })
 
